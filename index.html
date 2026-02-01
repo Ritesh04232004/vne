@@ -13,6 +13,7 @@ body {
     text-align: center;
     padding: 40px;
     margin: 0;
+    overflow: hidden;
 }
 
 h1 {
@@ -21,29 +22,9 @@ h1 {
 
 .panda {
     font-size: 2.2em;
-    line-height: 1.2;
     white-space: pre;
     margin: 20px auto;
-    transition: all 0.5s;
-}
-
-.crying {
-    animation: cry 1s infinite;
-}
-
-@keyframes cry {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.happy {
-    animation: jump 0.6s infinite;
-}
-
-@keyframes jump {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0); }
+    transition: transform 0.2s;
 }
 
 .buttons {
@@ -57,7 +38,7 @@ button {
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s;
+    position: relative;
 }
 
 #yesBtn {
@@ -68,10 +49,7 @@ button {
 #noBtn {
     background-color: #ccc;
     color: #666;
-}
-
-.hearts {
-    font-size: 2em;
+    position: absolute;
 }
 
 .photos {
@@ -100,11 +78,7 @@ button {
  🦶          🦶
 </div>
 
-<div class="message">
-Hey Chotu, will you be my Valentine? 😘
-</div>
-
-<div class="hearts">❤️ 💖 💕 💓</div>
+<p>Hey Chotu, will you be my Valentine? 😘</p>
 
 <div class="buttons">
     <button id="yesBtn">Yes! 💖</button>
@@ -113,23 +87,62 @@ Hey Chotu, will you be my Valentine? 😘
 
 <div class="photos" id="photos">
     <p>Yay! Here's us together! 😍</p>
-    <img src="he.jpg">
-    <img src="her.jpeg">
+    <img src="picture/he.jpg">
+    <img src="picture/her.jpeg">
 </div>
 
 <script>
-let noClickCount = 0;
-
 const panda = document.getElementById("panda");
-const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
 const photos = document.getElementById("photos");
 
+let noClickCount = 0;
+let cryInterval = null;
+let jumpInterval = null;
+
+/* Cry animation */
+function startCrying() {
+    let scale = 1;
+    cryInterval = setInterval(() => {
+        scale = scale === 1 ? 1.05 : 1;
+        panda.style.transform = `scale(${scale})`;
+    }, 400);
+}
+
+/* Happy jump */
+function startJumping() {
+    let up = false;
+    jumpInterval = setInterval(() => {
+        panda.style.transform = up ? "translateY(0)" : "translateY(-15px)";
+        up = !up;
+    }, 300);
+}
+
+function stopAnimations() {
+    clearInterval(cryInterval);
+    clearInterval(jumpInterval);
+    panda.style.transform = "none";
+}
+
+/* Move No button randomly */
+function moveNoButton() {
+    const padding = 20;
+    const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+    const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+    const randomX = Math.random() * maxX;
+    const randomY = Math.random() * maxY;
+
+    noBtn.style.left = randomX + "px";
+    noBtn.style.top = randomY + "px";
+}
+
+/* NO BUTTON LOGIC */
 noBtn.addEventListener("click", () => {
     noClickCount++;
 
     if (noClickCount === 1) {
-        panda.classList.add("crying");
         panda.textContent = `
       ʕಥᴥಥʔ
   /|  💧 💧 |\\
@@ -138,24 +151,17 @@ noBtn.addEventListener("click", () => {
   /          \\
  🦶            🦶
         `;
-        noBtn.style.fontSize = "1em";
-    } 
-    else if (noClickCount === 2) {
-        noBtn.style.position = "absolute";
-        noBtn.style.left = panda.offsetLeft + "px";
-        noBtn.style.top = panda.offsetTop + "px";
-        noBtn.style.transform = "scale(0.3)";
-        setTimeout(() => noBtn.style.display = "none", 800);
+        startCrying();
+    }
+
+    if (noClickCount >= 3) {
+        moveNoButton();
     }
 });
 
+/* YES BUTTON LOGIC */
 yesBtn.addEventListener("click", () => {
-    photos.style.display = "block";
-    yesBtn.style.display = "none";
-    noBtn.style.display = "none";
-
-    panda.classList.remove("crying");
-    panda.classList.add("happy");
+    stopAnimations();
 
     panda.textContent = `
        ʕ≧ᴥ≦ʔﾉ♡
@@ -165,9 +171,14 @@ yesBtn.addEventListener("click", () => {
     🦶          🦶
      🎉  YAY!!!  🎉
     `;
+
+    startJumping();
+
+    yesBtn.style.display = "none";
+    noBtn.style.display = "none";
+    photos.style.display = "block";
 });
 </script>
 
 </body>
 </html>
-
